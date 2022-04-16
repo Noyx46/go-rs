@@ -1,0 +1,67 @@
+:root {
+  --bg-0: #333;
+  --bg-1: #555;
+  --fg-white: #ccc;
+  --fg-black: #222;
+  --fg-grey: #444;
+
+  --fg-white-t: #ccc7;
+  --fg-black-t: #2227;
+
+  --c-tile-size: 5rem;
+  font-size: 16px;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  background-color: var(--bg-0);
+  display: flex;
+  height: 100%;
+  margin: 0;
+
+  // Center the  board
+  align-items: center;
+  justify-content: center;
+}
+
+button {
+  border: none;
+  background-color: var(--bg-1);
+  color: var(--fg-white);
+  padding: 6px 10px;
+}
+
+.g-container {
+  padding: 2.75rem;
+  background-color: #aa9e63;
+}
+
+.g-container svg {
+  position: absolute;
+}
+
+.g-board {
+  border-collapse: collapse;
+}
+
+.g-board td {
+  border: 1px solid black;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+}
+
+.g-preview-white {
+  width: 1.9rem;
+  height: 1.9rem;
+  background-color: var(--fg-white-t);
+}
+
+.g-preview-black {
+  width: 1.9rem;
+  height: 1.9rem;
+  background-color: var(--fg-black-t);
+}
