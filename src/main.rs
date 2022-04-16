@@ -9,7 +9,7 @@ use game::*;
 
 enum Msg {
     /// Making the board with the field indicating the
-    MakeBoard { size: usize },
+    MakeBoard { _size: usize },
     /// A click on the go board, fields are client x
     /// and y values of the click
     Click { x: i32, y: i32 },
@@ -62,7 +62,7 @@ impl Component for App {
                     Some(preview_coords) if preview_coords == (x, y) => {
                         self.preview = None;
                         // Play the move on the board
-                        if let Err(_) = self.board.play_move(x, y) {
+                        if self.board.play_move(x, y).is_err() {
                             false
                         } else {
                             true
@@ -85,7 +85,7 @@ impl Component for App {
     fn view(&self, ctx: &Context<Self>) -> Html {
         match self.board.board_size() {
             0 => {
-                let button_onclick = ctx.link().callback(move |_| Msg::MakeBoard { size: 19 });
+                let button_onclick = ctx.link().callback(move |_| Msg::MakeBoard { _size: 19 });
                 html! {
                     <>
                         <button onclick={ button_onclick }>{ "Default" }</button>
@@ -318,16 +318,8 @@ impl App {
             self.board.board_size() - (self.board.board_size() / 4),
         ];
         let coords_iter = coords
-            .clone()
             .into_iter()
-            .map(|x| {
-                coords
-                    .clone()
-                    .into_iter()
-                    .map(|y| (x, y))
-                    .collect::<Vec<_>>()
-            })
-            .flatten()
+            .flat_map(|x| coords.into_iter().map(|y| (x, y)).collect::<Vec<_>>())
             .collect::<Vec<_>>();
         let mut circles_svg = Vec::with_capacity(9);
         for (x, y) in coords_iter {
