@@ -1,5 +1,5 @@
 use gloo_console::log;
-use gloo_utils::{body, document, window};
+use gloo_utils::*;
 use web_sys::HtmlElement;
 use yew::prelude::*;
 
@@ -9,7 +9,7 @@ use game::*;
 
 enum Msg {
     /// Making the board with the field indicating the
-    MakeBoard { _size: usize },
+    MakeBoard { size: usize },
     /// A click on the go board, fields are client x
     /// and y values of the click
     Click { x: i32, y: i32 },
@@ -38,6 +38,10 @@ impl Component for App {
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             // TODO: implement creations for every size
+            Msg::MakeBoard { size: x } if [5, 7, 9, 13].contains(&x) => {
+                self.board = GoGame::new(x);
+                true
+            }
             Msg::MakeBoard { .. } => {
                 self.board = GoGame::default();
                 true
@@ -62,11 +66,7 @@ impl Component for App {
                     Some(preview_coords) if preview_coords == (x, y) => {
                         self.preview = None;
                         // Play the move on the board
-                        if self.board.play_move(x, y).is_err() {
-                            false
-                        } else {
-                            true
-                        }
+                        !self.board.play_move(x, y).is_err()
                     }
                     _ => {
                         // TODO: only allow open positions
@@ -85,7 +85,7 @@ impl Component for App {
     fn view(&self, ctx: &Context<Self>) -> Html {
         match self.board.board_size() {
             0 => {
-                let button_onclick = ctx.link().callback(move |_| Msg::MakeBoard { _size: 19 });
+                let button_onclick = ctx.link().callback(move |_| Msg::MakeBoard { size: 19 });
                 html! {
                     <>
                         <button onclick={ button_onclick }>{ "Default" }</button>
@@ -176,19 +176,19 @@ impl App {
         }
     }
     /// Renders moves, but it preparational style
-    /// TODO: change them to be actual pieces
     fn render_moves(&self) -> Html {
         const TILE_MODIFIER: f64 = 0.45;
 
         let board_size = self.board.board_size();
+        let board_padding = self.get_board_padding();
         let mut tiles = Vec::with_capacity(board_size);
         for (i, player) in self.board.position().iter().enumerate() {
             let (x, y) = self.board.index_to_coord(i);
             let tile_size = self.get_tile_size();
             let shift_size = tile_size + self.get_tile_border_width();
 
-            let shift_x = (shift_size * x) as i32;
-            let shift_y = (shift_size * y) as i32;
+            let shift_x = shift_size * x + board_padding;
+            let shift_y = shift_size * y + board_padding;
 
             // Get computed style
             let body_style = window().get_computed_style(&body()).unwrap().unwrap();
@@ -226,7 +226,10 @@ impl App {
         let svg_size = self.get_tile_size() as usize * (self.board.board_size() - 1)
             + self.get_tile_border_width() as usize * self.board.board_size();
         html! {
-            <svg width={ svg_size.to_string() } height={ svg_size.to_string() } fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg width={ (svg_size + 2 * board_padding).to_string() }
+                height={ (svg_size + 2 * board_padding).to_string() }
+                style={ format!("transform: translate(-{0}px, -{0}px);", board_padding) }
+                fill="none" xmlns="http://www.w3.org/2000/svg">
                 { for tiles }
             </svg>
         }
@@ -267,7 +270,11 @@ impl App {
     }
 
     fn get_board_padding(&self) -> usize {
-        let board = document().query_selector(".g-container").unwrap().unwrap();
+        let board = document().query_selector(".g-container").unwrap();
+        if board.is_none() {
+            return 0;
+        }
+        let board = board.unwrap();
         let board_style = window().get_computed_style(&board).unwrap().unwrap();
         let board_padding = board_style
             .get_property_value("padding-left")

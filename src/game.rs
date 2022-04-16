@@ -2,7 +2,7 @@ pub struct GoGame {
     board_size: usize,
     move_history: Vec<Move>,
     position: Vec<Player>,
-    _first_turn: usize,
+    first_turn: usize,
     turn: usize,
     half_turn: usize,
     pub first_player: Player,
@@ -15,7 +15,7 @@ impl GoGame {
             board_size,
             move_history: vec![],
             position: vec![Player::default(); board_size * board_size],
-            _first_turn: 0,
+            first_turn: 0,
             turn: 0,
             half_turn: 0,
             first_player: Player::Black,
@@ -71,9 +71,9 @@ impl GoGame {
         let index = self.coord_to_index(x, y);
         self.position[index] = player;
         self.move_history.push(Move {
-            _player: player,
-            _square: Square { _x: x, _y: y },
-            _half_turn: self.half_turn,
+            player,
+            square: Square { x, y },
+            half_turn: self.half_turn,
         })
         // TODO: actually process the move
     }
@@ -94,14 +94,14 @@ impl Default for GoGame {
 }
 
 struct Move {
-    pub _player: Player,
-    pub _square: Square,
-    pub _half_turn: usize,
+    pub player: Player,
+    pub square: Square,
+    pub half_turn: usize,
 }
 
 struct Square {
-    pub _x: usize,
-    pub _y: usize,
+    pub x: usize,
+    pub y: usize,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
