@@ -38,6 +38,7 @@ impl Component for App {
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             // TODO: implement creations for every size
+            // currently must be odd so dots work properly
             Msg::MakeBoard { size: x } if [5, 7, 9, 13].contains(&x) => {
                 self.board = GoGame::new(x);
                 true
@@ -66,12 +67,17 @@ impl Component for App {
                     Some(preview_coords) if preview_coords == (x, y) => {
                         self.preview = None;
                         // Play the move on the board
-                        !self.board.play_move(x, y).is_err()
+                        self.board.play_move(x, y).is_ok()
                     }
                     _ => {
-                        // TODO: only allow open positions
-                        self.preview = Some((x, y));
-                        true
+                        // Check if position can be played on
+                        log!(self.board.is_valid_move(x, y, self.board.next_player));
+                        if self.board.is_valid_move(x, y, self.board.next_player) {
+                            self.preview = Some((x, y));
+                            true
+                        } else {
+                            false
+                        }
                     }
                 }
             }
