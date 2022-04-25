@@ -71,7 +71,8 @@ impl Component for App {
                     }
                     _ => {
                         // Check if position can be played on
-                        if self.board.is_valid_move(x, y, self.board.next_player) {
+                        let next_player = self.board.next_player;
+                        if self.board.is_valid_move(x, y, next_player) {
                             self.preview = Some((x, y));
                             true
                         } else {
