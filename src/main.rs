@@ -71,12 +71,12 @@ impl Component for App {
                     }
                     _ => {
                         // Check if position can be played on
-                        log!(self.board.is_valid_move(x, y, self.board.next_player));
                         if self.board.is_valid_move(x, y, self.board.next_player) {
                             self.preview = Some((x, y));
                             true
                         } else {
-                            false
+                            self.preview = None;
+                            true
                         }
                     }
                 }

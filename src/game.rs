@@ -123,7 +123,7 @@ impl GoGame {
         let check_surrounding = self
             .get_surrounding_valid_indicies(index)
             .into_iter()
-            .map(|i| self.position[index] == player || self.check_for_capture(i).is_empty())
+            .map(|i| self.position[i] == player || self.check_for_capture(i).is_empty())
             .all(|x| x);
         // 3: remove the move
         self.position[index] = Player::None;
