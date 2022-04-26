@@ -230,34 +230,44 @@ impl GoGame {
         }
     }
 
+    fn incr_turn(&mut self) {
+        if self.next_player == self.first_player {
+            self.turn += 1;
+        }
+        self.half_turn += 1;
+
+        // Handle player and turn data
+        self.next_player = match self.next_player {
+            Player::White => Player::Black,
+            Player::Black => Player::White,
+            Player::None => Player::None,
+        };
+    }
+
+    pub fn pass(&mut self) {
+        self.move_history.push(Move::Pass {
+            player: self.next_player,
+            half_turn: self.half_turn,
+        });
+        self.incr_turn();
+    }
+
     pub fn play_move(&mut self, x: usize, y: usize) -> Result<(), String> {
         match self.position.get(self.position.coord_to_index(x, y)) {
-            Some(piece) => {
-                match piece {
-                    Player::None => {
-                        self.move_history.push(Move {
-                            player: self.next_player,
-                            square: Square { x, y },
-                            half_turn: self.half_turn,
-                        });
-                        self.position.process_move(x, y, self.next_player);
+            Some(piece) => match piece {
+                Player::None => {
+                    self.move_history.push(Move::Play {
+                        player: self.next_player,
+                        square: Square { x, y },
+                        half_turn: self.half_turn,
+                    });
+                    self.position.process_move(x, y, self.next_player);
+                    self.incr_turn();
 
-                        // Handle player and turn data
-                        self.next_player = match self.next_player {
-                            Player::White => Player::Black,
-                            Player::Black => Player::White,
-                            Player::None => Player::None,
-                        };
-                        if self.next_player == self.first_player {
-                            self.turn += 1;
-                        }
-                        self.half_turn += 1;
-
-                        Ok(())
-                    }
-                    _ => Err(String::from("A piece is already at that coordinate")),
+                    Ok(())
                 }
-            }
+                _ => Err(String::from("A piece is already at that coordinate")),
+            },
             None => Err(format!(
                 "Invalid coordinate for board size {}",
                 self.position.board_size
@@ -287,10 +297,16 @@ impl DerefMut for GoGame {
 }
 
 #[derive(Debug)]
-struct Move {
-    pub player: Player,
-    pub square: Square,
-    pub half_turn: usize,
+enum Move {
+    Pass {
+        player: Player,
+        half_turn: usize,
+    },
+    Play {
+        player: Player,
+        square: Square,
+        half_turn: usize,
+    },
 }
 
 #[derive(Debug)]

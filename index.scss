@@ -12,17 +12,28 @@
   font-size: 16px;
 }
 
+@media only screen and (max-width: 1024px) {
+  :root {
+    font-size: 12px;
+  }
+}
+
 html {
   height: 100%;
 }
 
 body {
   background-color: var(--bg-0);
-  display: flex;
   height: 100%;
   margin: 0;
+  padding: 1px;
+}
 
-  // Center the  board
+main {
+  min-height: 100%;
+  display: flex;
+
+  // Center the board
   align-items: center;
   justify-content: center;
 }
@@ -64,4 +75,18 @@ button {
   width: 1.9rem;
   height: 1.9rem;
   background-color: var(--fg-black-t);
+}
+
+.control-panel {
+  margin-left: 2rem;
+  padding: 2rem;
+  background-color: var(--fg-black);
+  width: 8rem;
+  height: 14rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.control-panel button {
+  flex-grow: 0;
 }

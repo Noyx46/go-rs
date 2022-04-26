@@ -13,8 +13,8 @@ enum Msg {
     /// A click on the go board, fields are client x
     /// and y values of the click
     Click { x: i32, y: i32 },
-    /// Signals that the window or something has been resized
-    Resize,
+    /// A player passes
+    Pass,
 }
 
 struct App {
@@ -82,8 +82,9 @@ impl Component for App {
                     }
                 }
             }
-            Msg::Resize => {
-                log!("Resized!");
+            Msg::Pass => {
+                self.preview = None;
+                self.board.pass();
                 true
             }
         }
@@ -94,12 +95,12 @@ impl Component for App {
             0 => {
                 let button_onclick = ctx.link().callback(move |_| Msg::MakeBoard { size: 19 });
                 html! {
-                    <>
+                    <main>
                         <button onclick={ button_onclick }>{ "Default" }</button>
                         <table class="g-board" style="display: none;">
                             <td></td>
                         </table>
-                    </>
+                    </main>
                 }
             }
             _ => {
@@ -115,25 +116,28 @@ impl Component for App {
                         y: mouse_y,
                     }
                 });
-                let board_onresize = ctx.link().callback(move |_: Event| Msg::Resize);
                 let board = self.make_board_ref();
                 let dots = self.make_dots_html();
                 let preview = self.render_preview();
                 let tiles = self.render_moves();
 
+                let control_panel = self.control_panel(ctx);
+
                 // Return full html
                 html! {
-                    <div
-                        ref={ self.board_ref.clone() }
-                        onclick={ board_oncontext }
-                        onresize={ board_onresize }
-                        class="g-container"
-                    >
-                        { preview }
-                        { dots }
-                        { tiles }
-                        { board }
-                    </div>
+                    <main>
+                        <div
+                            ref={ self.board_ref.clone() }
+                            onclick={ board_oncontext }
+                            class="g-container"
+                        >
+                            { preview }
+                            { dots }
+                            { tiles }
+                            { board }
+                        </div>
+                        { control_panel }
+                    </main>
                 }
             }
         }
@@ -141,6 +145,15 @@ impl Component for App {
 }
 
 impl App {
+    fn control_panel(&self, ctx: &Context<Self>) -> Html {
+        let pass_cb = ctx.link().callback(|_: MouseEvent| Msg::Pass);
+        html! {
+            <div class="control-panel">
+                <button onclick={ pass_cb }>{ "Pass" }</button>
+            </div>
+        }
+    }
+
     fn render_preview(&self) -> Html {
         match self.preview {
             None => {
@@ -320,7 +333,6 @@ impl App {
         // Retrieve some values from the stylesheet
         let border_width = self.get_tile_border_width() as f64;
         let box_size = self.get_tile_size() as f64;
-        println!("{}, {} = (1, 31)?", border_width, box_size);
 
         let svg_size = box_size as usize * (self.board.board_size() - 1)
             + border_width as usize * self.board.board_size();
