@@ -62,7 +62,11 @@ impl GoPosition {
         // Reset ko
         self.ko = self.board_size * self.board_size + 1;
         // Get coordinates of the adjacent positions of played piece
-        let sides = self.get_surrounding_valid_indicies(self.coord_to_index(x, y));
+        let sides: Vec<_> = self
+            .get_surrounding_valid_indicies(self.coord_to_index(x, y))
+            .into_iter()
+            .filter(|i| self.position[*i] == opp_player)
+            .collect();
         for s in sides {
             let to_remove = self.check_for_capture(s);
             // Set ko if necessary
@@ -93,9 +97,11 @@ impl GoPosition {
         if let Player::None = player {
             return false;
         }
+        // ko possible?
+        let mut ko_pos = false;
         // check for ko
         if index == self.ko {
-            return false;
+            ko_pos = true;
         }
         // check for self-capture
         // 1: play the move
@@ -106,7 +112,15 @@ impl GoPosition {
         let check_surrounding = self
             .get_surrounding_valid_indicies(index)
             .into_iter()
-            .map(|i| self.position[i] == player || self.check_for_capture(i).is_empty())
+            .map(|i| {
+                let captures = self.check_for_capture(i);
+                let capturing = if !ko_pos {
+                    captures.is_empty()
+                } else {
+                    captures.len() <= 1
+                };
+                self.position[i] == player || capturing
+            })
             .all(|x| x);
         // 3: remove the move
         self.position[index] = Player::None;
