@@ -1,26 +1,35 @@
-use gloo_console::log;
 use gloo_utils::*;
 use web_sys::HtmlElement;
 use yew::prelude::*;
 
 mod game;
+mod sidebar;
 
 use game::*;
+use sidebar::make_sidebar;
 
 enum Msg {
     /// Making the board with the field indicating the
-    MakeBoard { size: usize },
+    MakeBoard {
+        size: usize,
+    },
     /// A click on the go board, fields are client x
     /// and y values of the click
-    Click { x: i32, y: i32 },
+    Click {
+        x: i32,
+        y: i32,
+    },
     /// A player passes
     Pass,
+    HideSidebar,
+    ShowSidebar,
 }
 
 struct App {
     board_ref: NodeRef,
     board: GoGame,
     preview: Option<(usize, usize)>,
+    sidebar_shown: bool,
 }
 
 impl Component for App {
@@ -32,6 +41,7 @@ impl Component for App {
             board_ref: NodeRef::default(),
             board: GoGame::new(0),
             preview: None,
+            sidebar_shown: false,
         }
     }
 
@@ -87,6 +97,14 @@ impl Component for App {
                 self.board.pass();
                 true
             }
+            Msg::HideSidebar => {
+                self.sidebar_shown = false;
+                true
+            }
+            Msg::ShowSidebar => {
+                self.sidebar_shown = true;
+                true
+            }
         }
     }
 
@@ -123,21 +141,37 @@ impl Component for App {
 
                 let control_panel = self.control_panel(ctx);
 
+                let hide_sidebar_callback = ctx.link().callback(|_: MouseEvent| Msg::HideSidebar);
+                let sidebar_children = html! {
+                    <>
+                        <h1 style="flex: 0 0 100%;">{ "Hello, world!" }</h1>
+                    </>
+                };
+                let sidebar_html =
+                    make_sidebar(sidebar_children, self.sidebar_shown, hide_sidebar_callback);
+
+                let show_sidebar_callback = ctx.link().callback(|_: MouseEvent| Msg::ShowSidebar);
+
                 // Return full html
                 html! {
-                    <main>
-                        <div
-                            ref={ self.board_ref.clone() }
-                            onclick={ board_oncontext }
-                            class="g-container"
-                        >
-                            { preview }
-                            { dots }
-                            { tiles }
-                            { board }
-                        </div>
-                        { control_panel }
-                    </main>
+                    <>
+                        // sidebar icon
+                        <img id="menu-icon" src="imgs/menu.svg" onclick={ show_sidebar_callback } />
+                        { sidebar_html }
+                        <main>
+                            <div
+                                ref={ self.board_ref.clone() }
+                                onclick={ board_oncontext }
+                                class="g-container"
+                            >
+                                { dots }
+                                { preview }
+                                { tiles }
+                                { board }
+                            </div>
+                            { control_panel }
+                        </main>
+                    </>
                 }
             }
         }
@@ -283,7 +317,7 @@ impl App {
             .chars()
             .filter(|c| c.is_numeric())
             .collect::<String>()
-            // convert to f64
+            // convert to usize
             .parse::<usize>()
             .unwrap();
         border_width
@@ -303,7 +337,7 @@ impl App {
             .chars()
             .filter(|c| c.is_numeric())
             .collect::<String>()
-            // convert to f64
+            // convert to usize
             .parse::<usize>()
             .unwrap();
         board_padding
@@ -330,6 +364,46 @@ impl App {
     }
 
     fn make_dots_html(&self) -> Html {
+        let tile = document().query_selector(".g-board td").unwrap().unwrap();
+        let tile_width = "var(--tile-width)";
+        let tile_style = window().get_computed_style(&tile).unwrap().unwrap();
+        let border_width = tile_style.get_property_value("border-top-width").unwrap();
+        if self.board.board_size() % 2 == 0 {
+            html! {}
+        } else {
+            let coords = [
+                self.board.board_size() / 4 - 1,
+                self.board.board_size() / 2,
+                self.board.board_size() - (self.board.board_size() / 4),
+            ];
+            let coords = coords
+                .into_iter()
+                .flat_map(|x| coords.into_iter().map(|y| (x, y)).collect::<Vec<_>>())
+                .collect::<Vec<_>>();
+            let mut dots_html = Vec::with_capacity(9);
+            for (x, y) in coords {
+                let translate_x = format!(
+                    "calc({0} * {1} + {0} * {2} - 3px)",
+                    x, tile_width, border_width
+                );
+                let translate_y = format!(
+                    "calc({0} * {1} + {0} * {2} - 3px)",
+                    y, tile_width, border_width
+                );
+                let dot = html! {
+                    <div
+                        class="dot"
+                        style={ format!("transform: translate({}, {})", translate_x, translate_y)}>
+                    </div>
+                };
+                dots_html.push(dot)
+            }
+            html! { <div class="dots">{ for dots_html }</div> }
+        }
+    }
+
+    /// Old way to make dots, using svg
+    fn _make_dots_html(&self) -> Html {
         // Retrieve some values from the stylesheet
         let border_width = self.get_tile_border_width() as f64;
         let box_size = self.get_tile_size() as f64;

@@ -1,3 +1,7 @@
+* {
+  margin: 0;
+}
+
 :root {
   --bg-0: #333;
   --bg-1: #555;
@@ -12,7 +16,7 @@
   font-size: 16px;
 }
 
-@media only screen and (max-width: 1024px) {
+@media only screen and (max-height: 780px) {
   :root {
     font-size: 12px;
   }
@@ -25,8 +29,8 @@ html {
 body {
   background-color: var(--bg-0);
   height: 100%;
-  margin: 0;
   padding: 1px;
+  color: var(--fg-white);
 }
 
 main {
@@ -48,6 +52,8 @@ button {
 .g-container {
   padding: 2.75rem;
   background-color: #aa9e63;
+  --tile-width: 2rem;
+  --border-width: 1px;
 }
 
 .g-container svg {
@@ -56,24 +62,26 @@ button {
 
 .g-board {
   border-collapse: collapse;
+  --tile-width: 2rem;
+  --border-width: 1px;
 }
 
 .g-board td {
   border: 1px solid black;
-  width: 2rem;
-  height: 2rem;
+  width: var(--tile-width);
+  height: var(--tile-width);
   padding: 0;
 }
 
 .g-preview-white {
-  width: 1.9rem;
-  height: 1.9rem;
+  width: var(--tile-width);
+  height: var(--tile-width);
   background-color: var(--fg-white-t);
 }
 
 .g-preview-black {
-  width: 1.9rem;
-  height: 1.9rem;
+  width: var(--tile-width);
+  height: var(--tile-width);
   background-color: var(--fg-black-t);
 }
 
@@ -89,4 +97,21 @@ button {
 
 .control-panel button {
   flex-grow: 0;
+}
+
+.g-container .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 3px;
+  display: inline-block;
+  background-color: var(--bg-0);
+  position: absolute;
+}
+
+#menu-icon {
+  filter: invert(89%) sepia(8%) saturate(0%) hue-rotate(162deg) brightness(83%) contrast(88%);
+  margin-left: 1rem;
+  margin-top: 1rem;
+  width: 1.5rem;
+  height: 1.5rem;
 }
