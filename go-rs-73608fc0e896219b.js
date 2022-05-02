@@ -208,7 +208,7 @@ function makeClosure(arg0, arg1, dtor, f) {
     return real;
 }
 function __wbg_adapter_18(arg0, arg1, arg2) {
-    wasm._dyn_core__ops__function__Fn__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h57262f05467f6d20(arg0, arg1, addHeapObject(arg2));
+    wasm._dyn_core__ops__function__Fn__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h2cdbc677e28afe65(arg0, arg1, addHeapObject(arg2));
 }
 
 let cachegetUint32Memory0 = null;
@@ -270,7 +270,7 @@ async function load(module, imports) {
 
 async function init(input) {
     if (typeof input === 'undefined') {
-        input = new URL('index-e3edd35feb2d746f_bg.wasm', import.meta.url);
+        input = new URL('go-rs-73608fc0e896219b_bg.wasm', import.meta.url);
     }
     const imports = {};
     imports.wbg = {};
@@ -512,8 +512,8 @@ async function init(input) {
     imports.wbg.__wbindgen_throw = function(arg0, arg1) {
         throw new Error(getStringFromWasm0(arg0, arg1));
     };
-    imports.wbg.__wbindgen_closure_wrapper262 = function(arg0, arg1, arg2) {
-        const ret = makeClosure(arg0, arg1, 61, __wbg_adapter_18);
+    imports.wbg.__wbindgen_closure_wrapper294 = function(arg0, arg1, arg2) {
+        const ret = makeClosure(arg0, arg1, 70, __wbg_adapter_18);
         return addHeapObject(ret);
     };
 
