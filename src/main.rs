@@ -156,7 +156,7 @@ impl Component for App {
                 html! {
                     <>
                         // sidebar icon
-                        <img id="menu-icon" src="imgs/menu.svg" onclick={ show_sidebar_callback } />
+                        <img class="menu-icon" src="imgs/menu.svg" onclick={ show_sidebar_callback } />
                         { sidebar_html }
                         <main>
                             <div
@@ -251,6 +251,7 @@ impl App {
                 Player::None => {}
                 Player::White => {
                     let white = body_style.get_property_value("--fg-white").unwrap();
+                    let white = self.convert_color_to_hex(white);
                     let tile = html! {
                         <circle
                             cx={ shift_x.to_string() }
@@ -264,6 +265,7 @@ impl App {
                 }
                 Player::Black => {
                     let black = body_style.get_property_value("--fg-black").unwrap();
+                    let black = self.convert_color_to_hex(black);
                     let tile = html! {
                         <circle
                             cx={ shift_x.to_string() }
@@ -287,6 +289,23 @@ impl App {
                 { for tiles }
             </svg>
         }
+    }
+
+    /// Converts a comma-space-separated list of rgb values into the hexadecimal color
+    /// equivalent. The function also adds a '#' to the front.
+    ///
+    /// Example:
+    /// ```rust
+    /// let result = self.convert_color_to_hex("0, 0, 0".to_owned());
+    /// assert_eq!(result, "#000000");
+    /// ```
+    fn convert_color_to_hex(&self, color_str: String) -> String {
+        "#".to_owned()
+            + &color_str
+                .split(", ")
+                .map(|part| format!("{:X}", part.parse::<usize>().unwrap()))
+                .collect::<Vec<String>>()
+                .join("")
     }
 
     fn get_tile_size(&self) -> usize {
