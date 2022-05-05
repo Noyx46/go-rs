@@ -302,8 +302,8 @@ impl App {
     fn convert_color_to_hex(&self, color_str: String) -> String {
         "#".to_owned()
             + &color_str
-                .split(", ")
-                .map(|part| format!("{:X}", part.parse::<usize>().unwrap()))
+                .split(",")
+                .map(|part| format!("{:X}", part.trim().parse::<usize>().unwrap()))
                 .collect::<Vec<String>>()
                 .join("")
     }
